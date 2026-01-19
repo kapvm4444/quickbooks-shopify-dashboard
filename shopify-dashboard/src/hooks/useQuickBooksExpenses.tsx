@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 
 // Base URL for your backend API
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -180,6 +181,7 @@ const fetchExpenseData = async () => {
 
 export function useQuickBooksExpenses() {
   const { toast } = useToast();
+  const location = useLocation();
   const toastShownRef = useRef(false);
 
   const query = useQuery({
@@ -212,6 +214,9 @@ export function useQuickBooksExpenses() {
       const error = query.error as QuickBooksAuthError;
 
       if (error?.isQuickBooksAuth) {
+        // Skip toast if on login page
+        if (location.pathname === "/login") return;
+
         toastShownRef.current = true; // Mark toast as shown
 
         // QuickBooks not connected - show persistent toast with connect button

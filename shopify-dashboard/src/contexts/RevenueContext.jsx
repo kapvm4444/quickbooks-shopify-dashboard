@@ -1,15 +1,16 @@
+
 import React, { createContext, useContext } from "react";
-import { useQuickBooksRevenue } from "@/hooks/useQuickBooksRevenue";
+import { useCombinedRevenue } from "@/hooks/useCombinedRevenue";
 
 const RevenueContext = createContext();
 
 export function RevenueProvider({ children }) {
   const {
-    data: revenueRecords = [],
+    revenueRecords,
     isLoading,
     error,
     refetch,
-  } = useQuickBooksRevenue();
+  } = useCombinedRevenue();
 
   const value = {
     revenueRecords,

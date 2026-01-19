@@ -1,12 +1,11 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
+import { default as hotToast } from "react-hot-toast";
 
 export function useQuickBooksConnection() {
   const location = useLocation();
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   useEffect(() => {
     // Check if user just returned from QuickBooks connection
@@ -26,11 +25,20 @@ export function useQuickBooksConnection() {
       );
 
       // Show success toast
-      toast({
-        title: "QuickBooks Connected!",
-        description:
-          "Successfully connected to QuickBooks. Refreshing your data...",
-        variant: "default",
+      hotToast.success("QuickBooks Connected!", {
+        duration: 4000,
+        style: {
+          borderRadius: '12px',
+          background: '#18181b',
+          color: '#fafafa',
+          border: '1px solid #27272a',
+          fontSize: '14px',
+          fontWeight: '500',
+        },
+        iconTheme: {
+          primary: '#3b82f6',
+          secondary: '#18181b',
+        },
       });
 
       // Invalidate and refetch all QuickBooks queries
@@ -43,7 +51,7 @@ export function useQuickBooksConnection() {
         queryClient.refetchQueries({ queryKey: ["quickbooks-expenses"] });
       }, 1000); // Small delay to let the toast show
     }
-  }, [location.search, queryClient, toast]);
+  }, [location.search, queryClient]);
 
   return null;
 }

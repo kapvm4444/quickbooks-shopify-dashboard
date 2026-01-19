@@ -198,7 +198,7 @@ export const routes = () => ({
   //Integration Items
   integrationsItems: [
     {
-      isActive: false,
+      isActive: true,
       title: "Shopify Dashboard",
       path: "/shopify-dashboard",
       element: <ShopifyDashboard />,

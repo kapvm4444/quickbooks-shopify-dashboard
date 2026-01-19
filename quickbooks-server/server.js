@@ -6,6 +6,8 @@ const cors = require("cors");
 const authRoutes = require("./routers/authRoutes");
 const quickbooksRoutes = require("./routers/quickbooksRoutes");
 const callbackRoutes = require("./routers/callbackRoutes");
+const shopifyRoutes = require("./routers/shopifyRoutes");
+const appConfigRoutes = require("./routers/appConfigRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -27,12 +29,15 @@ app.use(express.json());
 // ============================================
 // ROUTES
 // ============================================
+// App Configuration (Firebase + Supabase)
+app.use("/api/config", appConfigRoutes);
 
 // Authentication routes
 app.use("/api/auth", authRoutes);
 
 // QuickBooks data routes (protected by auth middleware)
 app.use("/api", quickbooksRoutes);
+app.use("/api/shopify", shopifyRoutes);
 
 // OAuth callback route (special route, not under /api)
 app.use("/", callbackRoutes);

@@ -121,13 +121,13 @@ export interface ShopifyOrder {
   email: string;
   estimated_taxes: boolean;
   financial_status:
-    | "pending"
-    | "authorized"
-    | "paid"
-    | "partially_paid"
-    | "refunded"
-    | "voided"
-    | "partially_refunded";
+  | "pending"
+  | "authorized"
+  | "paid"
+  | "partially_paid"
+  | "refunded"
+  | "voided"
+  | "partially_refunded";
   fulfillment_status: "fulfilled" | "partial" | "restocked" | null;
   gateway: string;
   landing_site: string | null;
@@ -199,6 +199,26 @@ export interface ShopifyOrder {
     created_at: string;
     note: string | null;
     user_id: number | null;
+    transactions: Array<{
+      id: number;
+      order_id: number;
+      kind: "refund";
+      gateway: string;
+      status: string;
+      message: string | null;
+      created_at: string;
+      test: boolean;
+      authorization: string | null;
+      location_id: number | null;
+      user_id: number | null;
+      parent_id: number | null;
+      processed_at: string;
+      device_id: number | null;
+      error_code: string | null;
+      source_name: string;
+      amount: string;
+      currency: string;
+    }>;
   }>;
   shipping_address: ShopifyAddress | null;
   shipping_lines: Array<{
@@ -431,19 +451,19 @@ export interface OrderQueryParams {
   processed_at_max?: string;
   status?: "open" | "closed" | "cancelled" | "any";
   financial_status?:
-    | "authorized"
-    | "pending"
-    | "paid"
-    | "partially_paid"
-    | "refunded"
-    | "voided"
-    | "partially_refunded"
-    | "any";
+  | "authorized"
+  | "pending"
+  | "paid"
+  | "partially_paid"
+  | "refunded"
+  | "voided"
+  | "partially_refunded"
+  | "any";
   fulfillment_status?:
-    | "shipped"
-    | "partial"
-    | "unshipped"
-    | "any"
-    | "unfulfilled";
+  | "shipped"
+  | "partial"
+  | "unshipped"
+  | "any"
+  | "unfulfilled";
   fields?: string;
 }

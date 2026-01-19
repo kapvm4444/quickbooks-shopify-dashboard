@@ -1,4 +1,5 @@
 import Index from "../pages/Index.jsx";
+import Login from "../pages/Login.jsx";
 import { Route, Routes } from "react-router-dom";
 import Revenue from "@/pages/Revenue.jsx";
 import { RevenueProvider } from "@/contexts/RevenueContext.jsx";
@@ -81,6 +82,7 @@ export default function GenerateRoutes() {
     <RevenueProvider>
       <ExpenseProvider>
         <Routes>
+          <Route path="/login" element={<Login />} />
           <Route element={<DashboardLayout />}>
             {allRoutes.map((r) => (
               <Route path={r.path} element={r.element} key={r.path}></Route>

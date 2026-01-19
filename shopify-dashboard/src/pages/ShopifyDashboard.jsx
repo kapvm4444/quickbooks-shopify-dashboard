@@ -10,42 +10,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Store, Package, ShoppingCart, Users, MapPin } from "lucide-react";
-
-const staticData = {
-  productCount: 125,
-  orderCount: 542,
-  customerCount: 389,
-  locations: [
-    {
-      id: 1,
-      name: "Main Warehouse",
-      address1: "123 Main St",
-      city: "Anytown",
-      province: "CA",
-      zip: "90210",
-      country: "USA",
-      active: true,
-    },
-    {
-      id: 2,
-      name: "Retail Store",
-      address1: "456 Elm St",
-      city: "Othertown",
-      province: "CA",
-      zip: "90211",
-      country: "USA",
-      active: false,
-    },
-  ],
-};
+import { Store, Package, ShoppingCart, Users, MapPin, Loader2 } from "lucide-react";
+import { useShopifyProductCount } from "@/hooks/useShopifyProducts";
+import { useShopifyOrderCount } from "@/hooks/useShopifyOrders";
+import { useShopifyCustomerCount, useShopifyLocations } from "@/hooks/useShopifyCustomers";
 
 /**
  * Shopify Integration Dashboard
  * Main page to view and manage Shopify data
  */
 export default function ShopifyDashboard() {
-  const { productCount, orderCount, customerCount, locations } = staticData;
+  const { data: productCount, isLoading: isProductCountLoading } = useShopifyProductCount();
+  const { data: orderCount, isLoading: isOrderCountLoading } = useShopifyOrderCount();
+  const { data: customerCount, isLoading: isCustomerCountLoading } = useShopifyCustomerCount();
+  const { data: locations, isLoading: isLocationsLoading } = useShopifyLocations();
+
+  const isLoading = isProductCountLoading || isOrderCountLoading || isCustomerCountLoading || isLocationsLoading;
 
   return (
     <>
@@ -71,7 +51,11 @@ export default function ShopifyDashboard() {
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{productCount ?? 0}</div>
+              {isProductCountLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <div className="text-2xl font-bold">{productCount ?? 0}</div>
+              )}
               <p className="text-xs text-muted-foreground">
                 Active products in store
               </p>
@@ -86,7 +70,11 @@ export default function ShopifyDashboard() {
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{orderCount ?? 0}</div>
+              {isOrderCountLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <div className="text-2xl font-bold">{orderCount ?? 0}</div>
+              )}
               <p className="text-xs text-muted-foreground">All time orders</p>
             </CardContent>
           </Card>
@@ -99,7 +87,11 @@ export default function ShopifyDashboard() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{customerCount ?? 0}</div>
+              {isCustomerCountLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <div className="text-2xl font-bold">{customerCount ?? 0}</div>
+              )}
               <p className="text-xs text-muted-foreground">
                 Registered customers
               </p>
@@ -112,7 +104,11 @@ export default function ShopifyDashboard() {
               <MapPin className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{locations?.length ?? 0}</div>
+              {isLocationsLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <div className="text-2xl font-bold">{locations?.length ?? 0}</div>
+              )}
               <p className="text-xs text-muted-foreground">Store locations</p>
             </CardContent>
           </Card>
@@ -211,3 +207,4 @@ export default function ShopifyDashboard() {
     </>
   );
 }
+

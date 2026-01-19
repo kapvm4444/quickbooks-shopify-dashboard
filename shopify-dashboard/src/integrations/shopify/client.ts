@@ -1,4 +1,3 @@
-import { SHOPIFY_CONFIG } from "@/lib/constants";
 import type {
   ShopifyProductsResponse,
   ShopifyProductResponse,
@@ -22,18 +21,9 @@ class ShopifyClient {
   private headers: HeadersInit;
 
   constructor() {
-    const { STORE, ACCESS_TOKEN, API_VERSION } = SHOPIFY_CONFIG;
-
-    if (!STORE || !ACCESS_TOKEN) {
-      console.warn(
-        "Shopify credentials missing. Please set VITE_SHOPIFY_STORE and VITE_SHOPIFY_ACCESS_TOKEN in your .env file.",
-      );
-    }
-
-    this.baseUrl = `https://${STORE}/admin/api/${API_VERSION}`;
+    this.baseUrl = `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"}/api/shopify`;
     this.headers = {
       "Content-Type": "application/json",
-      "X-Shopify-Access-Token": ACCESS_TOKEN,
     };
   }
 
@@ -97,26 +87,29 @@ class ShopifyClient {
     return filteredParams ? `?${filteredParams}` : "";
   }
 
-  // Products
+  // Products - removed .json suffix to match backend routes
   async getProducts(
     params?: ProductQueryParams,
   ): Promise<ShopifyProductsResponse> {
     const queryString = this.buildQueryString(params);
     return this.request<ShopifyProductsResponse>(
-      `/products.json${queryString}`,
+      `/products${queryString}`,
     );
   }
 
   async getProduct(
     productId: number | string,
   ): Promise<ShopifyProductResponse> {
-    return this.request<ShopifyProductResponse>(`/products/${productId}.json`);
+    return this.request<ShopifyProductResponse>(`/products/${productId}`);
   }
 
+  // Create/Update/Delete - kept .json in case backend handles them via wildcard or future update, 
+  // BUT consistent with GETs being proxy, I should probably remove .json if I implement them in backend.
+  // For now I'll remove .json assuming consistency, but they will 404 until implemented.
   async createProduct(
     payload: CreateProductPayload,
   ): Promise<ShopifyProductResponse> {
-    return this.request<ShopifyProductResponse>("/products.json", {
+    return this.request<ShopifyProductResponse>("/products", {
       method: "POST",
       body: JSON.stringify({ product: payload }),
     });
@@ -126,14 +119,14 @@ class ShopifyClient {
     productId: number | string,
     payload: UpdateProductPayload,
   ): Promise<ShopifyProductResponse> {
-    return this.request<ShopifyProductResponse>(`/products/${productId}.json`, {
+    return this.request<ShopifyProductResponse>(`/products/${productId}`, {
       method: "PUT",
       body: JSON.stringify({ product: payload }),
     });
   }
 
   async deleteProduct(productId: number | string): Promise<void> {
-    await this.request<void>(`/products/${productId}.json`, {
+    await this.request<void>(`/products/${productId}`, {
       method: "DELETE",
     });
   }
@@ -143,24 +136,24 @@ class ShopifyClient {
   ): Promise<{ count: number }> {
     const queryString = this.buildQueryString(params);
     return this.request<{ count: number }>(
-      `/products/count.json${queryString}`,
+      `/products/count${queryString}`,
     );
   }
 
   // Orders
   async getOrders(params?: OrderQueryParams): Promise<ShopifyOrdersResponse> {
     const queryString = this.buildQueryString(params);
-    return this.request<ShopifyOrdersResponse>(`/orders.json${queryString}`);
+    return this.request<ShopifyOrdersResponse>(`/orders${queryString}`);
   }
 
   async getOrder(orderId: number | string): Promise<ShopifyOrderResponse> {
-    return this.request<ShopifyOrderResponse>(`/orders/${orderId}.json`);
+    return this.request<ShopifyOrderResponse>(`/orders/${orderId}`);
   }
 
   async createOrder(
     payload: CreateOrderPayload,
   ): Promise<ShopifyOrderResponse> {
-    return this.request<ShopifyOrderResponse>("/orders.json", {
+    return this.request<ShopifyOrderResponse>("/orders", {
       method: "POST",
       body: JSON.stringify({ order: payload }),
     });
@@ -170,7 +163,7 @@ class ShopifyClient {
     orderId: number | string,
     payload: Partial<CreateOrderPayload>,
   ): Promise<ShopifyOrderResponse> {
-    return this.request<ShopifyOrderResponse>(`/orders/${orderId}.json`, {
+    return this.request<ShopifyOrderResponse>(`/orders/${orderId}`, {
       method: "PUT",
       body: JSON.stringify({ order: payload }),
     });
@@ -181,7 +174,7 @@ class ShopifyClient {
     reason?: string,
   ): Promise<ShopifyOrderResponse> {
     return this.request<ShopifyOrderResponse>(
-      `/orders/${orderId}/cancel.json`,
+      `/orders/${orderId}/cancel`,
       {
         method: "POST",
         body: JSON.stringify({ reason }),
@@ -190,7 +183,7 @@ class ShopifyClient {
   }
 
   async closeOrder(orderId: number | string): Promise<ShopifyOrderResponse> {
-    return this.request<ShopifyOrderResponse>(`/orders/${orderId}/close.json`, {
+    return this.request<ShopifyOrderResponse>(`/orders/${orderId}/close`, {
       method: "POST",
     });
   }
@@ -199,7 +192,7 @@ class ShopifyClient {
     params?: Omit<OrderQueryParams, "limit" | "page_info">,
   ): Promise<{ count: number }> {
     const queryString = this.buildQueryString(params);
-    return this.request<{ count: number }>(`/orders/count.json${queryString}`);
+    return this.request<{ count: number }>(`/orders/count${queryString}`);
   }
 
   // Inventory
@@ -210,7 +203,7 @@ class ShopifyClient {
   }): Promise<ShopifyInventoryLevelsResponse> {
     const queryString = this.buildQueryString(params);
     return this.request<ShopifyInventoryLevelsResponse>(
-      `/inventory_levels.json${queryString}`,
+      `/inventory_levels${queryString}`,
     );
   }
 
@@ -220,7 +213,7 @@ class ShopifyClient {
     available_adjustment: number;
   }): Promise<ShopifyInventoryLevelsResponse> {
     return this.request<ShopifyInventoryLevelsResponse>(
-      "/inventory_levels/adjust.json",
+      "/inventory_levels/adjust",
       {
         method: "POST",
         body: JSON.stringify(params),
@@ -234,7 +227,7 @@ class ShopifyClient {
     available: number;
   }): Promise<ShopifyInventoryLevelsResponse> {
     return this.request<ShopifyInventoryLevelsResponse>(
-      "/inventory_levels/set.json",
+      "/inventory_levels/set",
       {
         method: "POST",
         body: JSON.stringify(params),
@@ -244,14 +237,14 @@ class ShopifyClient {
 
   // Locations
   async getLocations(): Promise<ShopifyLocationsResponse> {
-    return this.request<ShopifyLocationsResponse>("/locations.json");
+    return this.request<ShopifyLocationsResponse>("/locations");
   }
 
   async getLocation(
     locationId: number | string,
   ): Promise<{ location: ShopifyLocation }> {
     return this.request<{ location: ShopifyLocation }>(
-      `/locations/${locationId}.json`,
+      `/locations/${locationId}`,
     );
   }
 
@@ -266,7 +259,7 @@ class ShopifyClient {
   }): Promise<ShopifyCustomersResponse> {
     const queryString = this.buildQueryString(params);
     return this.request<ShopifyCustomersResponse>(
-      `/customers.json${queryString}`,
+      `/customers${queryString}`,
     );
   }
 
@@ -274,18 +267,18 @@ class ShopifyClient {
     customerId: number | string,
   ): Promise<ShopifyCustomerResponse> {
     return this.request<ShopifyCustomerResponse>(
-      `/customers/${customerId}.json`,
+      `/customers/${customerId}`,
     );
   }
 
   async searchCustomers(query: string): Promise<ShopifyCustomersResponse> {
     return this.request<ShopifyCustomersResponse>(
-      `/customers/search.json?query=${encodeURIComponent(query)}`,
+      `/customers/search?query=${encodeURIComponent(query)}`,
     );
   }
 
   async getCustomerCount(): Promise<{ count: number }> {
-    return this.request<{ count: number }>("/customers/count.json");
+    return this.request<{ count: number }>("/customers/count");
   }
 }
 

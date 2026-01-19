@@ -1,13 +1,25 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ReactNode } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { PageLoader } from "@/components/ui/page-loader";
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 export function DashboardLayout() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <PageLoader message="Authenticating..." />;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">

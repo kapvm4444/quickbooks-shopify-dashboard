@@ -1,15 +1,15 @@
 import React, { createContext, useContext } from "react";
-import { useQuickBooksExpenses } from "@/hooks/useQuickBooksExpenses";
+import { useCombinedExpenses } from "@/hooks/useCombinedExpenses";
 
 const ExpenseContext = createContext();
 
 export function ExpenseProvider({ children }) {
   const {
-    data: expenseRecords = [],
+    expenseRecords,
     isLoading,
     error,
     refetch,
-  } = useQuickBooksExpenses();
+  } = useCombinedExpenses();
 
   const value = {
     expenseRecords,
