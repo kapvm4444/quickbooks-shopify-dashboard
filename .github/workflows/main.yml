@@ -22,7 +22,8 @@ jobs:
           script: |
             cd /var/www/cookware/
             ls -a
-            echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S git pull origin main
+            echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S git fetch origin
+            echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S git reset --hard origin/main
             cd quickbooks-server/
             echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S npm install
             cd ..
