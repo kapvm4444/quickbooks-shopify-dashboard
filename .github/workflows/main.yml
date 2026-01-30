@@ -20,12 +20,12 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            cd /var/www/cookware
-            sudo git pull origin main
+            cd /var/www/cookware/
+            ls -a
+            echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S git pull origin main
             cd quickbooks-server/
-            sudo npm install
+            echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S npm install
             cd ..
             cd shopify-dashboard/
-            sudo npm install
-            pm2 restart frontend
-            pm2 restart server
+            echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S npm install
+            pm2 restart all
