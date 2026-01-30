@@ -21,11 +21,11 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             cd /var/www/cookware
-            git pull origin main
+            sudo git pull origin main
             cd quickbooks-server/
-            npm install
+            sudo npm install
             cd ..
             cd shopify-dashboard/
-            npm install
+            sudo npm install
             pm2 restart frontend
             pm2 restart server
