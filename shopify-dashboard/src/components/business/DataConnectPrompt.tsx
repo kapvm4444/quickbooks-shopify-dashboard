@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Database, Upload, Link, FileSpreadsheet } from 'lucide-react';
+import { default as hotToast } from "react-hot-toast";
 
 interface DataConnectPromptProps {
   title?: string;
@@ -30,15 +31,32 @@ export const DataConnectPrompt: React.FC<DataConnectPromptProps> = ({
               <div className="text-xs text-muted-foreground">Import from spreadsheets</div>
             </div>
           </Button>
-          
-          <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
-            <Link className="h-8 w-8 text-muted-foreground" />
+
+          <Button
+            variant="outline"
+            className="h-auto p-4 flex flex-col items-center gap-2 hover:bg-muted/50 transition-colors"
+            onClick={async () => {
+              try {
+                const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+                const response = await fetch(`${BASE_URL}/api/auth/url`);
+                if (response.ok) {
+                  const { authUrl } = await response.json();
+                  window.location.href = authUrl;
+                } else {
+                  hotToast.error("Failed to get QuickBooks Auth URL");
+                }
+              } catch (e) {
+                hotToast.error("Could not connect to QuickBooks Server");
+              }
+            }}
+          >
+            <Link className="h-8 w-8 text-[#2CA01C]" /> {/* QuickBooks official green */}
             <div className="text-center">
               <div className="font-medium">QuickBooks</div>
               <div className="text-xs text-muted-foreground">Connect accounting data</div>
             </div>
           </Button>
-          
+
           <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
             <Upload className="h-8 w-8 text-muted-foreground" />
             <div className="text-center">
@@ -47,7 +65,7 @@ export const DataConnectPrompt: React.FC<DataConnectPromptProps> = ({
             </div>
           </Button>
         </div>
-        
+
         <div className="text-center">
           <p className="text-xs text-muted-foreground">
             Your dashboard will populate with real-time insights once data is connected

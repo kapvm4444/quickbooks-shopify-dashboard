@@ -1,0 +1,31 @@
+name: Update Code to Server
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    
+    steps:
+      - name: Checkout code (for workflow context only)
+        uses: actions/checkout@v4
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /var/www/cookware
+            git pull origin main
+            cd quickbooks-server/
+            npm install
+            cd ..
+            cd shopify-dashboard/
+            npm install
+            pm2 restart frontend
+            pm2 restart server
