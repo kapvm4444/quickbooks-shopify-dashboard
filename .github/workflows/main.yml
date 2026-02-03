@@ -29,5 +29,5 @@ jobs:
             cd ..
             cd shopify-dashboard/
             echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S npm install
-            echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S npm run build
+            echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S NODE_OPTIONS="--max-old-space-size=4096" npm run build
             pm2 restart all
