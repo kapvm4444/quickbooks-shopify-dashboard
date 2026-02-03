@@ -47,16 +47,7 @@ app.use("/", callbackRoutes);
 // ============================================
 
 app.get("/", (req, res) => {
-  res.json({
-    message: "🚀 QuickBooks API Server",
-    status: "running",
-    authType: "In-Memory (Server-Side Storage)",
-    endpoints: {
-      auth: "/api/auth/*",
-      data: "/api/*",
-      callback: "/callback",
-    },
-  });
+  res.status(403).end("Server is running and you do not have access to it");
 });
 
 // ============================================
