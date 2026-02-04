@@ -1,5 +1,8 @@
 import { useState, useEffect, createContext, useContext, useRef } from "react";
-import { supabase, isSupabaseInitialized } from "@/integrations/supabase/client";
+import {
+  supabase,
+  isSupabaseInitialized,
+} from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { default as hotToast } from "react-hot-toast";
 import { useLocation } from "react-router-dom";
@@ -14,8 +17,8 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   loading: true,
-  login: async () => { },
-  logout: async () => { },
+  login: async () => {},
+  logout: async () => {},
 });
 
 // STATIC CREDENTIALS
@@ -36,6 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const location = useLocation();
+  const [response, setResponse] = useState(null);
   const notifRef = useRef(false);
 
   // Effect to handle connection toasts ONLY upon login/auth
@@ -55,50 +59,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         hotToast.success("Connected to Supabase", {
           duration: 4000,
           style: {
-            borderRadius: '12px',
-            background: '#18181b', // Zinc-950
-            color: '#fafafa', // Zinc-50
-            border: '1px solid #27272a',
-            fontSize: '14px',
-            fontWeight: '500',
+            borderRadius: "12px",
+            background: "#18181b", // Zinc-950
+            color: "#fafafa", // Zinc-50
+            border: "1px solid #27272a",
+            fontSize: "14px",
+            fontWeight: "500",
           },
           iconTheme: {
-            primary: '#4ade80',
-            secondary: '#18181b',
+            primary: "#4ade80",
+            secondary: "#18181b",
           },
         });
       } else {
         hotToast.error("Supabase Not Connected", {
           duration: 5000,
           style: {
-            borderRadius: '12px',
-            background: '#ef4444',
-            color: '#fff',
-            fontSize: '14px',
-            fontWeight: '500',
+            borderRadius: "12px",
+            background: "#ef4444",
+            color: "#fff",
+            fontSize: "14px",
+            fontWeight: "500",
           },
         });
       }
 
       // Check QuickBooks Server (Backend)
+      const BASE_URL =
+        import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+      const urlResponse = await fetch(`${BASE_URL}/`); // Health check
+      setResponse(urlResponse);
       try {
-        const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
-        const response = await fetch(`${BASE_URL}/`); // Health check
         if (response.ok) {
           hotToast.success("QuickBooks Server Connected", {
             duration: 4000,
             style: {
-              borderRadius: '12px',
-              background: '#18181b',
-              color: '#fafafa',
-              border: '1px solid #27272a',
-              fontSize: '14px',
-              marginTop: '8px',
-              fontWeight: '500',
+              borderRadius: "12px",
+              background: "#18181b",
+              color: "#fafafa",
+              border: "1px solid #27272a",
+              fontSize: "14px",
+              marginTop: "8px",
+              fontWeight: "500",
             },
             iconTheme: {
-              primary: '#3b82f6', // Blue for QB
-              secondary: '#18181b',
+              primary: "#3b82f6", // Blue for QB
+              secondary: "#18181b",
             },
           });
         } else {
@@ -108,12 +114,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         hotToast.error("QuickBooks Server Disconnected", {
           duration: 6000,
           style: {
-            borderRadius: '12px',
-            background: '#ef4444',
-            color: '#fff',
-            fontSize: '14px',
-            marginTop: '8px',
-            fontWeight: '500',
+            borderRadius: "12px",
+            background: "#ef4444",
+            color: "#fff",
+            fontSize: "14px",
+            marginTop: "8px",
+            fontWeight: "500",
           },
         });
       }
@@ -121,12 +127,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Small delay to ensure UI is ready
     setTimeout(runChecks, 500);
-
   }, [user]);
 
   // Initial Session Check
   useEffect(() => {
-    let authListener: { subscription: { unsubscribe: () => void } } | null = null;
+    let authListener: { subscription: { unsubscribe: () => void } } | null =
+      null;
 
     const checkSession = async () => {
       // 1. Check for Static Session
@@ -140,16 +146,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // 2. Check for Supabase Session (if initialized)
       if (isSupabaseInitialized()) {
         try {
-          const { data: { session } } = await supabase.auth.getSession();
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
           if (session?.user) {
             setUser(session.user);
           }
 
           // Listen for changes
-          const { data } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-            setLoading(false); // Ensure loading stops even on auth change
-          });
+          const { data } = supabase.auth.onAuthStateChange(
+            (_event, session) => {
+              setUser(session?.user ?? null);
+              setLoading(false); // Ensure loading stops even on auth change
+            },
+          );
           authListener = data;
         } catch (err) {
           console.error("Supabase session check check failed", err);
@@ -184,7 +194,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // If error is specifically passed credentials, fail.
       // But if error implies connection issue, fall through?
-      // Supabase JS doesn't always expose error codes clearly for "connection failed" vs "wrong password" reliably in one go, 
+      // Supabase JS doesn't always expose error codes clearly for "connection failed" vs "wrong password" reliably in one go,
       // but "invalid_grant" is wrong password. "fetch failed" is connection.
 
       if (error.message.includes("Invalid login credentials")) {
@@ -207,7 +217,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         toast({
           title: "Supabase Disconnected",
           description: "Logged in using failsafe static credentials.",
-          variant: 'destructive'
+          variant: "destructive",
         });
         return;
       } else {
@@ -229,7 +239,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast({
         title: "Connection Error",
         description: "Authentication service is unavailable.",
-        variant: "destructive"
+        variant: "destructive",
       });
       throw new Error("Auth unavailable");
     }
