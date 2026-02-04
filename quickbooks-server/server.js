@@ -19,7 +19,13 @@ const PORT = process.env.PORT || 5000;
 // Enable CORS
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "*", // Your React app URL
+    origin: [
+      process.env.FRONTEND_URL,
+      "https://server.soledash.space",
+      "https://soledash.space",
+      "https://www.soledash.space",
+    ], // Your React app URL
+    credentials: true,
   }),
 );
 
